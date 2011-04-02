@@ -62,7 +62,7 @@ __device__ inline uint leftrotate (uint x, uint c)
 	return (x << c) | (x >> (32-c));
 }
 
-__device__ inline void step (const uint i, const uint f, const uint g, uint &a, uint &b, uint &c, uint &d, const uint *w)
+__device__ inline void step (const uint i, const uint f, const uint g, uint &a, uint &b, uint &c, uint &d, const uint * w)
 {
 	uint temp = d;
 	d = c;
@@ -83,13 +83,81 @@ __device__ inline void md5 (const uint * w, uint &a, uint &b, uint &c, uint &d)
 	c = c0;
 	d = d0;
 	
-	uint f, g, i = 0;
+	uint f, g;
+	uint i = 0;
+	
 	for(; i != 16; i++)
 	{
 		f = (b & c) | ((~b) & d);
 		g = i;
 		step(i, f, g, a, b, c, d, w);
 	}
+	
+	/*
+	f = (b & c) | ((~b) & d);
+	g = 0;
+	step(0, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 1;
+	step(1, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 2;
+	step(2, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 3;
+	step(3, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 4;
+	step(4, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 5;
+	step(5, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 6;
+	step(6, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 7;
+	step(7, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 8;
+	step(8, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 9;
+	step(9, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 10;
+	step(10, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 11;
+	step(11, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 12;
+	step(12, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 13;
+	step(13, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 14;
+	step(14, f, g, a, b, c, d, w);
+	
+	f = (b & c) | ((~b) & d);
+	g = 15;
+	step(15, f, g, a, b, c, d, w);
+	*/
 	
 	for(; i != 32; i++)
 	{
@@ -98,6 +166,72 @@ __device__ inline void md5 (const uint * w, uint &a, uint &b, uint &c, uint &d)
 		step(i, f, g, a, b, c, d, w);
 	}
 	
+	/*
+	f = (d & b) | ((~d) & c);
+	g = 1;
+	step(16, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 6;
+	step(17, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 11;
+	step(18, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 0;
+	step(19, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 5;
+	step(20, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 10;
+	step(21, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 15;
+	step(22, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 4;
+	step(23, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 9;
+	step(24, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 14;
+	step(25, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 3;
+	step(26, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 8;
+	step(27, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 13;
+	step(28, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 2;
+	step(29, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 7;
+	step(30, f, g, a, b, c, d, w);
+	
+	f = (d & b) | ((~d) & c);
+	g = 12;
+	step(31, f, g, a, b, c, d, w);
+	*/
+	
 	for(; i != 48; i++)
 	{
 		f = b ^ c ^ d;
@@ -105,12 +239,144 @@ __device__ inline void md5 (const uint * w, uint &a, uint &b, uint &c, uint &d)
 		step(i, f, g, a, b, c, d, w);
 	}
 	
+	/*
+	f = b ^ c ^ d;
+	g = 5;
+	step(32, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 8;
+	step(33, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 11;
+	step(34, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 14;
+	step(35, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 1;
+	step(36, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 4;
+	step(37, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 7;
+	step(38, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 10;
+	step(39, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 13;
+	step(40, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 0;
+	step(41, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 3;
+	step(42, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 6;
+	step(43, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 9;
+	step(44, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 12;
+	step(45, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 15;
+	step(46, f, g, a, b, c, d, w);
+	
+	f = b ^ c ^ d;
+	g = 2;
+	step(47, f, g, a, b, c, d, w);
+	*/
+	
 	for(; i != 64; i++)
 	{
 		f = c ^ (b | (~d));
 		g = (7*i) % 16;
 		step(i, f, g, a, b, c, d, w);
 	}
+	
+	/*
+	f = c ^ (b | (~d));
+	g = 0;
+	step(48, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 7;
+	step(49, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 14;
+	step(50, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 5;
+	step(51, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 12;
+	step(52, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 3;
+	step(53, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 10;
+	step(54, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 1;
+	step(55, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 8;
+	step(56, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 15;
+	step(57, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 6;
+	step(58, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 13;
+	step(59, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 4;
+	step(60, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 11;
+	step(61, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 2;
+	step(62, f, g, a, b, c, d, w);
+	
+	f = c ^ (b | (~d));
+	g = 9;
+	step(63, f, g, a, b, c, d, w);
+	*/
 	
 	a += a0;
 	b += b0;
@@ -234,12 +500,34 @@ __device__ inline void md5v2 (const uint * in, uint &a, uint &b, uint &c, uint &
 
 __global__ void _gpu_md5_bruteforce (uint * words, int * res)
 {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	uint idx = blockIdx.x * blockDim.x + threadIdx.x;
 	uint a, b, c, d, in[16];
-	int i;
 	
+	/*
 	for (i = 0; i < 16; i++)
 		in[i] = words[idx * 16 + i];
+	*/
+	
+	/* Разворачиваем цикл, описанный выше */
+	
+	const uint tmp = idx * 16;
+	
+	in[0] = words[tmp];
+	in[1] = words[tmp + 1];
+	in[2] = words[tmp + 2];
+	in[3] = words[tmp + 3];
+	in[4] = words[tmp + 4];
+	in[5] = words[tmp + 5];
+	in[6] = words[tmp + 6];
+	in[7] = words[tmp + 7];
+	in[8] = words[tmp + 8];
+	in[9] = words[tmp + 9];
+	in[10] = words[tmp + 10];
+	in[11] = words[tmp + 11];
+	in[12] = words[tmp + 12];
+	in[13] = words[tmp + 13];
+	in[14] = words[tmp + 14];
+	in[15] = words[tmp + 15];
 	
 	md5(in, a, b, c, d);
 	
