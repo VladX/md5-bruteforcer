@@ -3,7 +3,7 @@
 #endif
 
 #ifndef GPU_THREADS
- #define GPU_THREADS 0 // Использовать GPU?
+ #define GPU_THREADS 1 // Использовать GPU?
 #endif
 
 #ifndef THREADS

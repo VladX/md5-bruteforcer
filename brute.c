@@ -109,6 +109,8 @@ void * bruteforce_gpu (void * args)
 		puts("Не найдено ни одного ускорителя с поддержкой CUDA!");
 		exit(1);
 	}
+	else
+		printf("=================\nCUDA Devices: %d\n=================\n", prop[0]);
 	
 	size = prop[1] * prop[2];
 	dsize = size * 16 * sizeof(unsigned int);

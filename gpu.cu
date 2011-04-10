@@ -543,7 +543,7 @@ void get_gpu_props (int * prop)
 	int nDevCount;
 	
 	cudaGetDeviceCount(&nDevCount);
-	printf("CUDA Devices: %d\n", nDevCount);
+	
 	prop[0] = nDevCount;
 	if (nDevCount > 0)
 	{
