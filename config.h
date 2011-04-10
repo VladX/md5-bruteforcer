@@ -7,7 +7,7 @@
 #endif
 
 #ifndef THREADS
- #define THREADS 1 // Общее количество потоков (CPU + GPU)
+ #define THREADS 2 // Общее количество потоков (CPU + GPU)
 #endif
 
 #undef I_SIZE

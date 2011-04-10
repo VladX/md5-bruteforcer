@@ -156,6 +156,8 @@ void * bruteforce_gpu (void * args)
 }
 #endif
 
+static unsigned int print_freq = 1000000;
+
 void * bruteforce (void * args)
 {
 	unsigned char i[I_SIZE];
@@ -278,7 +280,7 @@ void * bruteforce (void * args)
 				print_res((const char *) i);
 		}
 		#endif
-		if (counter % 1000000 == 0)
+		if (counter % print_freq == 0)
 			puts((const char *) i);
 		inc_iter(i, &i_len);
 		#if THREADS > 1
@@ -316,6 +318,8 @@ void init (char * hashedpass)
 			c2 = hashedpass[it + 1] - 'a' + 10;
 		srchash[it / 2] = c1 * 16 + c2;
 	}
+	
+	print_freq = print_freq * THREADS;
 	
 	for (it = 0; it < THREADS; it++)
 	{

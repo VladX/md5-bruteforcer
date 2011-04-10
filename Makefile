@@ -1,7 +1,7 @@
 CC= gcc
 PARAMS= -O3 -static -lpthread
 NVCC= nvcc
-NVCCPARAMS= -lpthread
+NVCCPARAMS= --optimize 3 -lpthread
 
 all:
 	$(CC) ./brute.c -c -o ./brute.o $(PARAMS)
