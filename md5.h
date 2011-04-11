@@ -1,76 +1,38 @@
 /*
- **********************************************************************
- ** Copyright (C) 1990, RSA Data Security, Inc. All rights reserved. **
- **                                                                  **
- ** License to copy and use this software is granted provided that   **
- ** it is identified as the "RSA Data Security, Inc. MD5 Message     **
- ** Digest Algorithm" in all material mentioning or referencing this **
- ** software or this function.                                       **
- **                                                                  **
- ** License is also granted to make and use derivative works         **
- ** provided that such works are identified as "derived from the RSA **
- ** Data Security, Inc. MD5 Message Digest Algorithm" in all         **
- ** material mentioning or referencing the derived work.             **
- **                                                                  **
- ** RSA Data Security, Inc. makes no representations concerning      **
- ** either the merchantability of this software or the suitability   **
- ** of this software for any particular purpose.  It is provided "as **
- ** is" without express or implied warranty of any kind.             **
- **                                                                  **
- ** These notices must be retained in any copies of any part of this **
- ** documentation and/or software.                                   **
- **********************************************************************
+ * Copyright (c) 2010 http://vladx.net/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
+#if defined(__i386) || defined(__i386__) || defined(_M_IX86)
+ #define md5_block_asm md5_block_asm_i586
+#elif defined(__x86_64) || defined(__x86_64__) || defined(_M_AMD64) || defined(_M_X64)
+ #define md5_block_asm md5_block_asm_x86_64
+#elif defined(__ia64) || defined(__ia64__) || defined(_M_IA64)
+ #define md5_block_asm md5_block_asm_ia64
+#else
+ #error "Unsupported arch"
+#endif
 
-#define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
-#define G(x, y, z) (((x) & (z)) | ((y) & (~z)))
-#define H(x, y, z) ((x) ^ (y) ^ (z))
-#define I(x, y, z) ((y) ^ ((x) | (~z))) 
+typedef struct
+{
+	unsigned int a, b, c, d;
+} md5_asm_c;
 
-/* ROTATE_LEFT rotates x left n bits */
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
-
-/* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4 */
-/* Rotation is separate from addition to prevent recomputation */
-#define FF(a, b, c, d, x, s, ac) \
-  {(a) += F ((b), (c), (d)) + (x) + (unsigned int)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
-#define GG(a, b, c, d, x, s, ac) \
-  {(a) += G ((b), (c), (d)) + (x) + (unsigned int)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
-#define HH(a, b, c, d, x, s, ac) \
-  {(a) += H ((b), (c), (d)) + (x) + (unsigned int)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
-#define II(a, b, c, d, x, s, ac) \
-  {(a) += I ((b), (c), (d)) + (x) + (unsigned int)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
-
-#define S11 7
-#define S12 12
-#define S13 17
-#define S14 22
-
-#define S21 5
-#define S22 9
-#define S23 14
-#define S24 20
-
-#define S31 4
-#define S32 11
-#define S33 16
-#define S34 23
-
-#define S41 6
-#define S42 10
-#define S43 15
-#define S44 21
-
+void md5_block_asm (md5_asm_c * c, void * data, size_t num);

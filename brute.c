@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <strings.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "config.h"
 
@@ -43,6 +44,8 @@ typedef struct
 	unsigned int c;
 	unsigned int d;
 } thread_args;
+
+static unsigned long long total_computed_hashes = 0, start_time_usec = 0;
 
 void inc_iter (unsigned char * i, unsigned int * l)
 {
@@ -96,6 +99,7 @@ void * bruteforce_gpu (void * args)
 	unsigned long long iters_total;
 	unsigned int abcd[4], i_len, it, size, dsize;
 	int prop[3], res;
+	struct timeval ttv;
 	
 	abcd[0] = ((thread_args *) args)->a;
 	abcd[1] = ((thread_args *) args)->b;
@@ -142,7 +146,10 @@ void * bruteforce_gpu (void * args)
 			
 		}
 		if (iters_total % 2000 == 0)
-			puts(i);
+		{
+			(void) gettimeofday(&ttv, NULL);
+			printf("%s %llu\n", (const char *) i, (total_computed_hashes / ((ttv.tv_sec * 1000000L + ttv.tv_usec) - start_time_usec)));
+		}
 		res = gpu_md5_bruteforce(words, prop, dsize);
 		if (res != -1)
 		{
@@ -154,6 +161,7 @@ void * bruteforce_gpu (void * args)
 			print_res(cw);
 		}
 		iters_total++;
+		total_computed_hashes += size;
 	}
 }
 #endif
@@ -171,16 +179,14 @@ void * bruteforce (void * args)
 	MD5_CTX md_ctx;
 	unsigned char hash[16];
 	#else
+	md5_asm_c md5asmc;
 	unsigned char pw[64];
-	unsigned int * in = (unsigned int *) pw, ai, bi, ci, di;
+	unsigned int * in = (unsigned int *) pw;
 	memset(pw, 0, sizeof(pw));
-	a -= 0x67452301;
-	b -= 0xEFCDAB89;
-	c -= 0x98BADCFE;
-	d -= 0x10325476;
 	#endif
-	unsigned long counter;
+	register unsigned long counter;
 	unsigned int i_len, it;
+	struct timeval ttv;
 	
 	for (it = 0; it < ((thread_args *) args)->thread_id; it++)
 		i[it] = '0';
@@ -188,7 +194,7 @@ void * bruteforce (void * args)
 	
 	i_len = strlen((const char *) i);
 	
-	for (counter = 1;; counter++)
+	for (counter = 1;; counter++, total_computed_hashes++)
 	{
 		#ifdef OPENSSL_MD5
 		MD5_Init(&md_ctx);
@@ -201,89 +207,19 @@ void * bruteforce (void * args)
 		pw[i_len] = 0x80;
 		in[14] = i_len * 8;
 		
-		/* Ron Rivest's MD5 C Implementation */
-		
-		ai = 0x67452301;
-		bi = 0xEFCDAB89;
-		ci = 0x98BADCFE;
-		di = 0x10325476;
-		
-		FF ( ai, bi, ci, di, in[0], S11, 3614090360);
-		FF ( di, ai, bi, ci, in[1], S12, 3905402710);
-		FF ( ci, di, ai, bi, in[2], S13, 606105819);
-		FF ( bi, ci, di, ai, in[3], S14, 3250441966);
-		FF ( ai, bi, ci, di, in[4], S11, 4118548399);
-		FF ( di, ai, bi, ci, in[5], S12, 1200080426);
-		FF ( ci, di, ai, bi, in[6], S13, 2821735955);
-		FF ( bi, ci, di, ai, in[7], S14, 4249261313);
-		FF ( ai, bi, ci, di, in[8], S11, 1770035416);
-		FF ( di, ai, bi, ci, in[9], S12, 2336552879);
-		FF ( ci, di, ai, bi, in[10], S13, 4294925233);
-		FF ( bi, ci, di, ai, in[11], S14, 2304563134);
-		FF ( ai, bi, ci, di, in[12], S11, 1804603682);
-		FF ( di, ai, bi, ci, in[13], S12, 4254626195);
-		FF ( ci, di, ai, bi, in[14], S13, 2792965006);
-		FF ( bi, ci, di, ai, in[15], S14, 1236535329);
-		
-		GG ( ai, bi, ci, di, in[1], S21, 4129170786);
-		GG ( di, ai, bi, ci, in[6], S22, 3225465664);
-		GG ( ci, di, ai, bi, in[11], S23, 643717713);
-		GG ( bi, ci, di, ai, in[0], S24, 3921069994);
-		GG ( ai, bi, ci, di, in[5], S21, 3593408605);
-		GG ( di, ai, bi, ci, in[10], S22, 38016083);
-		GG ( ci, di, ai, bi, in[15], S23, 3634488961);
-		GG ( bi, ci, di, ai, in[4], S24, 3889429448);
-		GG ( ai, bi, ci, di, in[9], S21, 568446438);
-		GG ( di, ai, bi, ci, in[14], S22, 3275163606);
-		GG ( ci, di, ai, bi, in[3], S23, 4107603335);
-		GG ( bi, ci, di, ai, in[8], S24, 1163531501);
-		GG ( ai, bi, ci, di, in[13], S21, 2850285829);
-		GG ( di, ai, bi, ci, in[2], S22, 4243563512);
-		GG ( ci, di, ai, bi, in[7], S23, 1735328473);
-		GG ( bi, ci, di, ai, in[12], S24, 2368359562);
-		
-		HH ( ai, bi, ci, di, in[5], S31, 4294588738);
-		HH ( di, ai, bi, ci, in[8], S32, 2272392833);
-		HH ( ci, di, ai, bi, in[11], S33, 1839030562);
-		HH ( bi, ci, di, ai, in[14], S34, 4259657740);
-		HH ( ai, bi, ci, di, in[1], S31, 2763975236);
-		HH ( di, ai, bi, ci, in[4], S32, 1272893353);
-		HH ( ci, di, ai, bi, in[7], S33, 4139469664);
-		HH ( bi, ci, di, ai, in[10], S34, 3200236656);
-		HH ( ai, bi, ci, di, in[13], S31, 681279174);
-		HH ( di, ai, bi, ci, in[0], S32, 3936430074);
-		HH ( ci, di, ai, bi, in[3], S33, 3572445317);
-		HH ( bi, ci, di, ai, in[6], S34, 76029189);
-		HH ( ai, bi, ci, di, in[9], S31, 3654602809);
-		HH ( di, ai, bi, ci, in[12], S32, 3873151461);
-		HH ( ci, di, ai, bi, in[15], S33, 530742520);
-		HH ( bi, ci, di, ai, in[2], S34, 3299628645);
-		
-		II ( ai, bi, ci, di, in[0], S41, 4096336452);
-		II ( di, ai, bi, ci, in[7], S42, 1126891415);
-		II ( ci, di, ai, bi, in[14], S43, 2878612391);
-		II ( bi, ci, di, ai, in[5], S44, 4237533241);
-		II ( ai, bi, ci, di, in[12], S41, 1700485571);
-		II ( di, ai, bi, ci, in[3], S42, 2399980690);
-		II ( ci, di, ai, bi, in[10], S43, 4293915773);
-		II ( bi, ci, di, ai, in[1], S44, 2240044497);
-		II ( ai, bi, ci, di, in[8], S41, 1873313359);
-		II ( di, ai, bi, ci, in[15], S42, 4264355552);
-		II ( ci, di, ai, bi, in[6], S43, 2734768916);
-		II ( bi, ci, di, ai, in[13], S44, 1309151649);
-		II ( ai, bi, ci, di, in[4], S41, 4149444226);
-		/* 'a' больше меняться не будет. Если сейчас она не равна исходному значению - считать дальше нет смысла. */
-		if (a == ai)
-		{
-			II ( di, ai, bi, ci, in[11], S42, 3174756917);
-			II ( ci, di, ai, bi, in[2], S43, 718787259);
-			II ( bi, ci, di, ai, in[9], S44, 3951481745);
-			if (b == bi && c == ci && d == di)
-				print_res((const char *) i);
-		}
+		md5asmc.a = 0x67452301;
+		md5asmc.b = 0xEFCDAB89;
+		md5asmc.c = 0x98BADCFE;
+		md5asmc.d = 0x10325476;
+		md5_block_asm(&md5asmc, pw, 1);
+		if (md5asmc.a == a && md5asmc.b == b && md5asmc.c == c && md5asmc.d == d)
+			print_res((const char *) i);
 		#endif
 		if (counter % print_freq == 0)
-			puts((const char *) i);
+		{
+			(void) gettimeofday(&ttv, NULL);
+			printf("%s %llu\n", (const char *) i, (total_computed_hashes / ((ttv.tv_sec * 1000000L + ttv.tv_usec) - start_time_usec)));
+		}
 		inc_iter(i, &i_len);
 		#if THREADS > 1
 		for (it = 0; it < i_len; it++)
@@ -322,6 +258,9 @@ void init (char * hashedpass)
 	}
 	
 	print_freq = print_freq * THREADS;
+	struct timeval tv;
+	(void) gettimeofday(&tv, NULL);
+	start_time_usec = tv.tv_sec * 1000000L + tv.tv_usec;
 	
 	for (it = 0; it < THREADS; it++)
 	{

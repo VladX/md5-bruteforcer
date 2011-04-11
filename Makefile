@@ -5,6 +5,7 @@ NVCCPARAMS= --optimize 3 -lpthread
 
 all:
 	$(CC) ./brute.c -c -o ./brute.o $(PARAMS)
+	$(CC) ./md5*.S -c $(PARAMS)
 	$(NVCC) ./gpu.cu -c -o ./gpu.o $(NVCCPARAMS)
 	$(NVCC) ./*.o -o ./brute $(NVCCPARAMS)
 brute: brute.o
