@@ -540,21 +540,24 @@ extern "C"
 void get_gpu_props (int * prop)
 {
 	cudaDeviceProp deviceProp;
-	int nDevCount;
+	int nDevCount, i;
 	
 	cudaGetDeviceCount(&nDevCount);
 	
 	prop[0] = nDevCount;
-	if (nDevCount > 0)
+	prop[1] = 0;
+	prop[2] = 0;
+	
+	for (i = 0; i < nDevCount; i++)
 	{
-		if (cudaSuccess != cudaGetDeviceProperties(&deviceProp, 0))
+		if (cudaSuccess != cudaGetDeviceProperties(&deviceProp, i))
 		{
-			prop[1] = 64;
-			prop[2] = 128;
+			prop[1] += 64;
+			prop[2] += 128;
 			return;
 		}
-		prop[1] = deviceProp.multiProcessorCount;
-		prop[2] = deviceProp.maxThreadsPerBlock;
+		prop[1] += deviceProp.multiProcessorCount;
+		prop[2] += deviceProp.maxThreadsPerBlock;
 	}
 }
 
@@ -574,10 +577,10 @@ int gpu_md5_bruteforce (uint * words, int * prop, unsigned int dsize)
 {
 	int blocks, threads_per_block, res;
 	
-	cudaMemcpy(d_words, words, dsize, cudaMemcpyHostToDevice);
+	cudaMemcpyAsync(d_words, words, dsize, cudaMemcpyHostToDevice, 0);
 	
 	res = -1;
-	cudaMemcpy(d_res, &res, sizeof(res), cudaMemcpyHostToDevice);
+	cudaMemcpyAsync(d_res, &res, sizeof(res), cudaMemcpyHostToDevice, 0);
 	
 	blocks = prop[1];
 	threads_per_block = prop[2];

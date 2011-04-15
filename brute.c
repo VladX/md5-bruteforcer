@@ -47,39 +47,68 @@ typedef struct
 
 static unsigned long long total_computed_hashes = 0, start_time_usec = 0;
 
-void inc_iter (unsigned char * i, unsigned int * l)
+static unsigned char chars_table_09AZaz[256] = {
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', '0', '0', '0', '0', '0', '0',
+'0', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', '0', '0', '0', '0', '0',
+'0', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '0', '0', '0', '0', '0'
+};
+
+static unsigned char chars_table_09AZ[256] = {
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', '0', '0', '0', '0', '0', '0',
+'0', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '0', '0', '0', '0', '0',
+'0', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '0', '0', '0', '0', '0'
+};
+
+static unsigned char chars_table_09az[256] = {
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', '0', '0', '0', '0', '0', '0',
+'0', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', '0', '0', '0', '0', '0',
+'0', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '0', '0', '0', '0', '0'
+};
+
+static unsigned char chars_table_09[256] = {
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '0', '0', '0', '0', '0', '0',
+'0', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', '0', '0', '0', '0', '0',
+'0', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '0', '0', '0', '0', '0'
+};
+
+static unsigned char * chars_table;
+
+void inc_iter (unsigned char ** ptr_i, unsigned int * l)
 {
-	unsigned int len = * l, n, c;
+	register unsigned int len = * l, n;
+	register unsigned char * i = * ptr_i;
 	
 	for (n = len - 1;; n--)
 	{
-		if ((i[n] > 47 && i[n] < 57) || (i[n] > 64 && i[n] < 90) || (i[n] > 96 && i[n] < 122))
-		{
-			i[n]++;
+		i[n] = chars_table[i[n]];
+		if (i[n] != '0')
 			break;
-		}
-		else if (i[n] == 57)
+		if (n == 0)
 		{
-			i[n] = 'A';
+			(* ptr_i)--;
+			(* ptr_i)[0] = '0';
+			(* l)++;
 			break;
-		}
-		else if (i[n] == 90)
-		{
-			i[n] = 'a';
-			break;
-		}
-		else if (i[n] == 122)
-		{
-			i[n] = '0';
-			if (n == 0)
-			{
-				i[len+1] = '\0';
-				for (c = 0; c < len; c++)
-					i[len-c] = i[len-c-1];
-				i[0] = '0';
-				(* l)++;
-				break;
-			}
 		}
 	}
 }
@@ -93,10 +122,11 @@ void print_res (const char * pass)
 #if GPU_THREADS
 void * bruteforce_gpu (void * args)
 {
-	unsigned char i[I_SIZE];
+	unsigned char __i[I_SIZE];
+	unsigned char * i = __i + (sizeof(__i) - (((thread_args *) args)->thread_id + 1));
 	unsigned int * words, * tmp;
-	unsigned long counter;
-	unsigned long long iters_total;
+	register unsigned long counter;
+	register unsigned long long iters_total;
 	unsigned int abcd[4], i_len, it, size, dsize;
 	int prop[3], res;
 	struct timeval ttv;
@@ -139,16 +169,22 @@ void * bruteforce_gpu (void * args)
 			memcpy(tmp, i, i_len);
 			((unsigned char *) tmp)[i_len] = 0x80;
 			tmp[14] = i_len * 8;
-			inc_iter(i, &i_len);
+			inc_iter(&i, &i_len);
 			for (it = 0; it < i_len; it++)
 				if (i[it] != '0')
 					break;
-			
+			if (it == i_len)
+			{
+				i -= THREADS - 1;
+				i_len += THREADS - 1;
+				memset(i, '0', i_len);
+				i[i_len] = '\0';
+			}
 		}
 		if (iters_total % 2000 == 0)
 		{
 			(void) gettimeofday(&ttv, NULL);
-			printf("%s %llu\n", (const char *) i, (total_computed_hashes / ((ttv.tv_sec * 1000000L + ttv.tv_usec) - start_time_usec)));
+			printf("%s, speed=%llu\n", (const char *) i, (total_computed_hashes / ((ttv.tv_sec * 1000000L + ttv.tv_usec) - start_time_usec)));
 		}
 		res = gpu_md5_bruteforce(words, prop, dsize);
 		if (res != -1)
@@ -170,7 +206,8 @@ static unsigned int print_freq = 1000000;
 
 void * bruteforce (void * args)
 {
-	unsigned char i[I_SIZE];
+	unsigned char __i[I_SIZE];
+	unsigned char * i = __i + (sizeof(__i) - (((thread_args *) args)->thread_id + 1));
 	unsigned int a = ((thread_args *) args)->a;
 	unsigned int b = ((thread_args *) args)->b;
 	unsigned int c = ((thread_args *) args)->c;
@@ -218,22 +255,19 @@ void * bruteforce (void * args)
 		if (counter % print_freq == 0)
 		{
 			(void) gettimeofday(&ttv, NULL);
-			printf("%s %llu\n", (const char *) i, (total_computed_hashes / ((ttv.tv_sec * 1000000L + ttv.tv_usec) - start_time_usec)));
+			printf("%s, speed=%llu\n", (const char *) i, (total_computed_hashes / ((ttv.tv_sec * 1000000L + ttv.tv_usec) - start_time_usec)));
 		}
-		inc_iter(i, &i_len);
+		inc_iter(&i, &i_len);
 		#if THREADS > 1
 		for (it = 0; it < i_len; it++)
 			if (i[it] != '0')
 				break;
 		if (it == i_len)
 		{
-			while (it < i_len + THREADS - 1)
-			{
-				i[it] = '0';
-				it++;
-			}
-			i[it] = '\0';
+			i -= THREADS - 1;
 			i_len += THREADS - 1;
+			memset(i, '0', i_len);
+			i[i_len] = '\0';
 		}
 		#endif
 	}
@@ -285,18 +319,63 @@ void init (char * hashedpass)
 
 int main (int argc, char ** argv)
 {
-	if (argc < 2)
+	char * hash = NULL, * charset = NULL;
+	
+	if (argc < 2 || argc == 3)
 	{
-		fprintf(stderr, "Использование: %s MD5-хэш\nUsage: %s MD5-hash\n", argv[0], argv[0]);
+		fprintf(stderr, "Usage: %s [-c charset number] MD5-hash\nExample: %s -c 1 827ccb0eea8a706c4c34a16891f84e7b\n", argv[0], argv[0]);
 		return 1;
 	}
 	
-	if (strlen(argv[1]) != 32)
+	int i;
+	
+	for (i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "-c") == 0)
+		{
+			i++;
+			charset = argv[i];
+		}
+		else
+			hash = argv[i];
+	}
+	
+	if (charset)
+	{
+		int ch = atoi(charset);
+		if (ch < 1)
+		{
+			fprintf(stderr, "Error: Invalid charset number!\n");
+			return 1;
+		}
+		switch (ch)
+		{
+			case 1:
+				chars_table = chars_table_09;
+				break;
+			case 2:
+				chars_table = chars_table_09az;
+				break;
+			case 3:
+				chars_table = chars_table_09AZ;
+				break;
+			case 4:
+				chars_table = chars_table_09AZaz;
+				break;
+			default:
+				fprintf(stderr, "Error: Unknown charset number - %d!\n", ch);
+				return 1;
+		}
+	}
+	else
+		chars_table = chars_table_09AZaz;
+	
+	if (strlen(hash) != 32)
 	{
 		fprintf(stderr, "Ошибка: Хэш должен быть длиной 32 символа!\nError: MD5 hexdecimal hash should be no longer than 32 characters!\n");
 		return 1;
 	}
 	
-	init(argv[1]);
+	init(hash);
 	return 0;
 }
